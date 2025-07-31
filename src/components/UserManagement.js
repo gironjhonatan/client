@@ -19,10 +19,7 @@ export default function UserManagement() {
       try {
         const empleados = await adminAPI.getEmpleados();
         const usuarios = await adminAPI.getUsuarios();
-
-        // Filtrar usuarios para excluir administradores
         const usuariosFiltrados = usuarios.filter(u => u.role !== 'admin');
-
         const merged = empleados.map(emp => {
           const userData = usuariosFiltrados.find(u => u.id === emp.user_id);
           return {
@@ -123,7 +120,7 @@ export default function UserManagement() {
                     className={styles.select}
                     onChange={(e) => handleRoleChange(user.user_id, e.target.value)}
                     value={roles[user.user_id] || user.role}
-                    disabled={user.role === 'admin'} // Deshabilitar si el usuario es admin
+                    disabled={user.role === 'admin'}
                   >
                     <option value="empleado">Empleado</option>
                     <option value="admin">Administrador</option>
