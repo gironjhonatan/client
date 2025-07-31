@@ -22,18 +22,13 @@ export default function Empleado() {
     const fetchData = async () => {
       if (user?.id && isMounted) {
         try {
-          console.log('Fetching solicitudes for user ID:', user.id);
           const solicitudesData = await empleadoAPI.getSolicitudes(user.id);
-          console.log('Solicitudes fetched:', solicitudesData);
           if (isMounted) {
-            console.log('Solicitudes data:', solicitudesData);
             setSolicitudes(solicitudesData);
           }
 
-          console.log('Fetching empleado for user ID:', user.id);
           const empleadoData = await empleadoAPI.getEmpleadoByUserId(user.id);
           if (isMounted) {
-            console.log('Empleado data:', empleadoData);
             setEmpleado(empleadoData[0]);
           }
         } catch (error) {

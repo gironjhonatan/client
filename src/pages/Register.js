@@ -19,7 +19,6 @@ export default function Register() {
         const res = await api.get('/auth/user-count');
         setUserCount(res.data.count);
       } catch (err) {
-        console.error('Error al contar usuarios:', err);
         setError('Error al cargar la información de usuarios');
       }
     };
@@ -62,7 +61,6 @@ export default function Register() {
         ...form,
         role,
       });
-      console.log('Usuario registrado:', registerRes.data);
       setTimeout(async () => {
         try {
           const credentials = {
