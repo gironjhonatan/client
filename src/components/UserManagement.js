@@ -19,9 +19,9 @@ export default function UserManagement() {
       try {
         const empleados = await adminAPI.getEmpleados();
         const usuarios = await adminAPI.getUsuarios();
-        const usuariosFiltrados = usuarios.filter(u => u.role !== 'admin');
+
         const merged = empleados.map(emp => {
-          const userData = usuariosFiltrados.find(u => u.id === emp.user_id);
+          const userData = usuarios.find(u => u.id === emp.user_id);
           return {
             ...emp,
             username: userData?.username || 'N/A',
@@ -30,7 +30,7 @@ export default function UserManagement() {
         });
 
         const userIdsConEmpleado = empleados.map(e => e.user_id);
-        const sinEmpleado = usuariosFiltrados.filter(u => !userIdsConEmpleado.includes(u.id));
+        const sinEmpleado = usuarios.filter(u => !userIdsConEmpleado.includes(u.id));
 
         setUsers(merged);
         setUsuariosSinEmpleado(sinEmpleado);
@@ -38,8 +38,15 @@ export default function UserManagement() {
         console.error('Error al obtener datos:', error);
       }
     };
-
     fetchAndMergeUsers();
+  }, []);
+
+  useEffect(() => {
+    const scrollPosition = sessionStorage.getItem('scrollPosition');
+    if (scrollPosition) {
+      window.scrollTo(0, parseInt(scrollPosition));
+      sessionStorage.removeItem('scrollPosition');
+    }
   }, []);
 
   const handleRoleChange = async (userId, newRole) => {
@@ -81,6 +88,7 @@ export default function UserManagement() {
 
   const handleCrearEmpleado = async (e) => {
     e.preventDefault();
+    sessionStorage.setItem('scrollPosition', window.scrollY);
     try {
       await adminAPI.crearEmpleado(newEmpleado);
       setShowModal(false);
@@ -105,7 +113,6 @@ export default function UserManagement() {
               <th>Fecha Ingreso</th>
               <th>Salario</th>
               <th>Rol</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -126,30 +133,26 @@ export default function UserManagement() {
                     <option value="admin">Administrador</option>
                   </select>
                 </td>
-                <td>
-                  <button className={styles.deleteButton} onClick={() => handleDeleteUser(user.id)}>
-                    Eliminar
-                  </button>
-                </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-
       {usuariosSinEmpleado.length > 0 && (
         <ul className={styles.userList}>
           {usuariosSinEmpleado.map(user => (
             <li key={user.id}>
               {user.username} ({user.role})
-              <button className={styles.createButton} onClick={() => handleOpenModal(user.id)}>
+              <button
+                className={styles.createButton}
+                onClick={() => handleOpenModal(user.id)}
+              >
                 Crear perfil de empleado
               </button>
             </li>
           ))}
         </ul>
       )}
-
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>

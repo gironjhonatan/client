@@ -4,6 +4,8 @@ import empleadoAPI from '../api/empleadoAPI';
 import styles from './Empleado.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Empleado() {
   const { user } = useAuth();
@@ -18,27 +20,21 @@ export default function Empleado() {
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchData = async () => {
       if (user?.id && isMounted) {
         try {
           const solicitudesData = await empleadoAPI.getSolicitudes(user.id);
-          if (isMounted) {
-            setSolicitudes(solicitudesData);
-          }
+          if (isMounted) setSolicitudes(solicitudesData);
 
           const empleadoData = await empleadoAPI.getEmpleadoByUserId(user.id);
-          if (isMounted) {
-            setEmpleado(empleadoData[0]);
-          }
+          if (isMounted) setEmpleado(empleadoData[0]);
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error('Error al obtener datos:', error);
         }
       }
     };
 
     fetchData();
-
     return () => {
       isMounted = false;
     };
@@ -46,9 +42,20 @@ export default function Empleado() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.id && !empleado) {
+      toast.info('Aún no eres empleado, el administrador lo hará');
+      return;
+    }
+
     try {
       if (form.id) {
-        await empleadoAPI.actualizarSolicitud(form.id, form);
+        await empleadoAPI.actualizarSolicitud(form.id, {
+          codigo: form.codigo,
+          descripcion: form.descripcion,
+          resumen: form.resumen,
+        });
+        toast.success('Solicitud actualizada correctamente');
       } else {
         const nuevaSolicitud = {
           codigo: form.codigo,
@@ -58,12 +65,23 @@ export default function Empleado() {
           status: false,
         };
         await empleadoAPI.crearSolicitud(nuevaSolicitud);
+        toast.success('Solicitud creada exitosamente');
       }
+
       setForm({ id: null, codigo: '', descripcion: '', resumen: '' });
       const solicitudesData = await empleadoAPI.getSolicitudes(user.id);
       setSolicitudes(solicitudesData);
     } catch (error) {
       console.error('Error al guardar solicitud:', error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message === 'El empleado no existe'
+      ) {
+        toast.info('Aún no eres empleado, el administrador lo hará');
+      } else {
+        toast.error('Ocurrió un error al guardar la solicitud.');
+      }
     }
   };
 
@@ -73,7 +91,6 @@ export default function Empleado() {
       codigo: solicitud.codigo,
       descripcion: solicitud.descripcion,
       resumen: solicitud.resumen,
-      status: solicitud.status,
     });
   };
 
@@ -83,8 +100,10 @@ export default function Empleado() {
     try {
       await empleadoAPI.eliminarSolicitud(id);
       setSolicitudes(solicitudes.filter(solicitud => solicitud.id !== id));
+      toast.success('Solicitud eliminada correctamente');
     } catch (error) {
       console.error('Error al eliminar solicitud:', error);
+      toast.error('Error al eliminar la solicitud');
     }
   };
 
@@ -95,7 +114,13 @@ export default function Empleado() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Panel del Empleado</h1>
+      <ToastContainer position="bottom-right" autoClose={3000} />
+      <h1 className={styles.title}>Panel</h1>
+
+      {empleado && (
+        <p className={styles.welcome}>Hola <strong>{empleado.nombre}</strong> 👋</p>
+      )}
+
       <div className={styles.twoColumnLayout}>
         <div className={styles.leftColumn}>
           <section className={styles.section}>
@@ -146,6 +171,7 @@ export default function Empleado() {
             </form>
           </section>
         </div>
+
         <div className={styles.rightColumn}>
           <section className={styles.section}>
             <h2 className={styles.subtitle}>Mis solicitudes</h2>

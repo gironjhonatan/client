@@ -3,7 +3,6 @@ import adminAPI from '../api/adminAPI';
 import styles from './RequestManagement.module.css';
 
 export default function RequestManagement() {
-  const [setRequests] = useState([]);
   const [mergedRequests, setMergedRequests] = useState([]);
 
   useEffect(() => {
@@ -14,10 +13,9 @@ export default function RequestManagement() {
           adminAPI.getEmpleados(),
           adminAPI.getUsuarios(),
         ]);
-
         const merged = solicitudes.map((solicitud) => {
-        const empleado = empleados.find(emp => emp.user_id === solicitud.user_id);
-        const usuario = usuarios.find(user => user.id === solicitud.user_id);
+        const empleado = empleados.find((emp) => emp.id === solicitud.id_empleado);
+        const usuario = usuarios.find((user) => user.id === empleado?.user_id);
 
           return {
             ...solicitud,
@@ -26,7 +24,6 @@ export default function RequestManagement() {
           };
         });
 
-        setRequests(solicitudes);
         setMergedRequests(merged);
       } catch (error) {
         console.error('Error al obtener o unir datos de solicitudes:', error);
@@ -40,9 +37,7 @@ export default function RequestManagement() {
     try {
       await adminAPI.actualizarEstadoSolicitud(requestId, { status });
       setMergedRequests((prev) =>
-        prev.map((req) =>
-          req.id === requestId ? { ...req, status } : req
-        )
+        prev.map((req) => (req.id === requestId ? { ...req, status } : req))
       );
     } catch (error) {
       console.error('Error al actualizar estado de solicitud:', error);

@@ -2,7 +2,7 @@ import api from './axios';
 
 const empleadoAPI = {
   getSolicitudes: async (user_id) => {
-    const res = await api.get(`/solicitudes/user?user_id=${user_id}`);
+    const res = await api.get(`/solicitudes/user?id_empleado=${user_id}`);
     return res.data;
   },
   getEmpleadoByUserId: async (userId) => {

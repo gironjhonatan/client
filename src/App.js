@@ -12,7 +12,9 @@ const Empleado = lazy(() => import('./pages/Empleado'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Cargando sesión...</div>;
 
   const routes = (
     <Routes>

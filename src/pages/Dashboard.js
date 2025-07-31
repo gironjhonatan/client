@@ -31,9 +31,6 @@ export default function Dashboard() {
       <div className={styles.card}>
         <FontAwesomeIcon icon={faHome} className={styles.mainIcon} />
         <h1 className={styles.title}>Bienvenido al Dashboard</h1>
-        <p className={styles.userInfo}>
-          Hola <strong>{user?.username}</strong> <strong>{user?.role}</strong>
-        </p>
         {renderRoleMessage()}
       </div>
     </div>
