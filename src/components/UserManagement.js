@@ -58,16 +58,6 @@ export default function UserManagement() {
     }
   };
 
-  const handleDeleteUser = async (empleadoId) => {
-    if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
-    try {
-      await adminAPI.eliminarEmpleado(empleadoId);
-      setUsers(prev => prev.filter(u => u.id !== empleadoId));
-    } catch (error) {
-      console.error('Error al eliminar empleado:', error);
-    }
-  };
-
   const formatFecha = (isoDate) => {
     const fecha = new Date(isoDate);
     return fecha.toLocaleDateString('es-CO', {
